@@ -10,6 +10,8 @@ import {
 } from "@/app/api/merchants/[slug]/route";
 import { MerchantMenuClient } from "@/components/customer/MerchantMenuClient";
 
+export const dynamic = "force-dynamic";
+
 interface MerchantPageProps {
   params: Promise<{ slug: string }>;
 }

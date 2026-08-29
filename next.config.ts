@@ -28,7 +28,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  ...(process.env.BUILD_STANDALONE === "true" ? { output: "standalone" as const } : {}),
   compiler: {
     removeConsole:
       process.env.NODE_ENV === "production"

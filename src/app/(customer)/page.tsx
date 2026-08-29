@@ -5,6 +5,8 @@ import Merchant from "@/models/Merchant";
 import Branch from "@/models/Branch";
 import { Sparkles, Zap, ShieldCheck } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "FoodGo - Discover & Order Food Nearby",
   description: "Order from top restaurants, fast food, and local bukas with rapid delivery.",
