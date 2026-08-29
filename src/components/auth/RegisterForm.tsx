@@ -8,15 +8,15 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 
-const nigerianPhoneRegex = /^(?:\+234|0)[789]\d{9}$/;
+const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]{5,20}$/;
 
 const registerSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
-    phone: z.string().regex(nigerianPhoneRegex, "Invalid Nigerian phone number (e.g., +2348012345678 or 08012345678)"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string(),
+    phone: z.string().min(5, "Phone number is too short").regex(phoneRegex, "Please enter a valid phone number"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
     role: z.enum(["CUSTOMER", "RIDER", "MERCHANT_ADMIN"]),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -42,6 +42,14 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+      role: "CUSTOMER",
+    },
   });
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -53,9 +61,9 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: data.name,
-          email: data.email,
-          phone: data.phone,
+          name: data.name.trim(),
+          email: data.email.toLowerCase().trim(),
+          phone: data.phone.trim(),
           password: data.password,
           role: data.role,
         }),
@@ -73,26 +81,32 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
       // Auto-login after successful registration
       const signInResult = await signIn("credentials", {
-        email: data.email,
+        email: data.email.toLowerCase().trim(),
         password: data.password,
         redirect: false,
       });
 
-      if (signInResult?.ok) {
-        if (onSuccess) {
-          onSuccess();
-        }
+      if (onSuccess) {
+        onSuccess();
+      }
 
-        // Redirect based on role
+      const targetPath =
+        data.role === "MERCHANT_ADMIN"
+          ? "/merchant"
+          : data.role === "RIDER"
+          ? "/rider"
+          : "/";
+
+      if (!signInResult?.error) {
         setTimeout(() => {
-          if (data.role === "CUSTOMER") {
-            router.push("/");
-          } else if (data.role === "MERCHANT_ADMIN") {
-            router.push("/merchant");
-          } else if (data.role === "RIDER") {
-            router.push("/rider");
-          }
+          router.push(targetPath);
+          router.refresh();
         }, 500);
+      } else {
+        setTimeout(() => {
+          router.push("/login");
+          router.refresh();
+        }, 800);
       }
     } catch {
       setError("An unexpected error occurred. Please try again.");
@@ -115,7 +129,15 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form
+      method="POST"
+      action="#"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSubmit(onSubmit)(e);
+      }}
+      className="space-y-4"
+    >
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-slate-700">
           Full Name
@@ -148,7 +170,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
       <div>
         <label htmlFor="phone" className="block text-sm font-medium text-slate-700">
-          Phone Number (Nigerian)
+          Phone Number
         </label>
         <input
           id="phone"

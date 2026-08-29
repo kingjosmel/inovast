@@ -35,7 +35,12 @@ declare module "next-auth/jwt" {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "foodgo_fallback_jwt_secret_token_1234567890",
+  pages: {
+    signIn: "/login",
+    error: "/login",
+  },
   providers: [
     Credentials({
       credentials: {
@@ -49,20 +54,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        const [{ connectToDatabase: dbConnect }, { default: User }, bcrypt] =
-          await Promise.all([
-            import("@/lib/db"),
-            import("@/models/User"),
-            import("bcryptjs"),
-          ]);
+        const email = parsedCredentials.data.email.toLowerCase().trim();
+        const password = parsedCredentials.data.password;
 
-        await dbConnect();
+        let user;
+        try {
+          const [{ connectToDatabase: dbConnect }, { default: User }, bcryptModule] =
+            await Promise.all([
+              import("@/lib/db"),
+              import("@/models/User"),
+              import("bcryptjs"),
+            ]);
 
-        const user = await User.findOne({ email: parsedCredentials.data.email })
-          .select("+passwordHash")
-          .lean();
+          await dbConnect();
 
-        if (!user || !(await bcrypt.compare(parsedCredentials.data.password, user.passwordHash))) {
+          user = await User.findOne({ email })
+            .select("+passwordHash")
+            .lean();
+
+          if (!user) {
+            console.warn(`[Auth] User not found for email: ${email}`);
+            return null;
+          }
+
+          const bcrypt = (bcryptModule as { default?: { compare: typeof import("bcryptjs").compare } }).default || bcryptModule;
+          const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+
+          if (!isPasswordValid) {
+            console.warn(`[Auth] Invalid password for email: ${email}`);
+            return null;
+          }
+        } catch (err: unknown) {
+          console.error("[Auth] Exception during authorize:", err);
           return null;
         }
 

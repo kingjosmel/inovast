@@ -38,13 +38,17 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
     try {
       const result = await signIn("credentials", {
-        email: data.email,
+        email: data.email.toLowerCase().trim(),
         password: data.password,
         redirect: false,
       });
 
-      if (!result || result.error) {
-        setError(result?.error || "Invalid email or password");
+      if (result?.error) {
+        setError(
+          result.error === "CredentialsSignin" || result.error === "Configuration"
+            ? "Invalid email or password. Please try again."
+            : result.error
+        );
         setIsLoading(false);
         return;
       }
@@ -53,34 +57,49 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         onSuccess();
       }
 
-      // Retrieve session to redirect directly to user's portal
-      const sessionResponse = await fetch("/api/auth/session");
-      if (sessionResponse.ok) {
-        const session = await sessionResponse.json();
-        const role = session?.user?.role;
+      // Fetch user role from session or default to homepage
+      let targetPath = "/";
+      try {
+        const sessionResponse = await fetch("/api/auth/session");
+        if (sessionResponse.ok) {
+          const session = await sessionResponse.json();
+          const role = session?.user?.role;
 
-        if (role === "MERCHANT_ADMIN") {
-          router.push("/merchant");
-        } else if (role === "RIDER") {
-          router.push("/rider");
-        } else if (role === "SUPER_ADMIN") {
-          router.push("/admin");
-        } else {
-          router.push("/");
+          if (role === "MERCHANT_ADMIN") {
+            targetPath = "/merchant";
+          } else if (role === "RIDER") {
+            targetPath = "/rider";
+          } else if (role === "SUPER_ADMIN") {
+            targetPath = "/admin";
+          }
         }
-      } else {
-        router.push("/");
+      } catch (sessionErr) {
+        console.error("Session lookup notice:", sessionErr);
       }
 
+      router.push(targetPath);
       router.refresh();
-    } catch {
-      setError("An unexpected error occurred. Please try again.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "";
+      if (message.includes("CredentialsSignin") || message.includes("Credentials")) {
+        setError("Invalid email or password. Please try again.");
+      } else {
+        setError("Could not sign in. Please verify your credentials and try again.");
+      }
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form
+      method="POST"
+      action="#"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSubmit(onSubmit)(e);
+      }}
+      className="space-y-4"
+    >
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-slate-700">
           Email

@@ -25,20 +25,24 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
     return cached.conn;
   }
 
+  let uri = process.env.MONGODB_URI || MONGODB_URI;
+  if (!uri.includes("mongodb.net/") || uri.endsWith("mongodb.net/")) {
+    uri = uri.replace(/mongodb\.net\/?(\?.*)?$/, "mongodb.net/foodgo$1");
+  }
+
   if (!cached.promise) {
     cached.promise = mongoose
-      .connect(MONGODB_URI, {
+      .connect(uri, {
+        dbName: "foodgo",
         bufferCommands: false,
-        serverSelectionTimeoutMS: 3000,
+        serverSelectionTimeoutMS: 10000,
       })
       .then((m) => {
-        if (process.env.NODE_ENV !== "production") {
-          console.info("MongoDB connected");
-        }
+        console.info("MongoDB connected successfully");
         return m;
       })
       .catch((err) => {
-        console.warn("MongoDB connection warning:", err.message);
+        console.error("MongoDB connection error:", err.message);
         cached.promise = null;
         throw err;
       });

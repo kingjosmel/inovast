@@ -5,11 +5,14 @@ import User from "@/models/User";
 import { connectToDatabase } from "@/lib/db";
 
 const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().regex(/^(?:\+234|0)[789]\d{9}$/, "Invalid Nigerian phone number"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.enum(["CUSTOMER", "RIDER", "MERCHANT_ADMIN"]),
+  name: z.string().min(2, "Name must be at least 2 characters").trim(),
+  email: z.string().email("Invalid email address").trim(),
+  phone: z
+    .string()
+    .min(5, "Phone number must be at least 5 digits")
+    .regex(/^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]{5,20}$/, "Please enter a valid phone number"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  role: z.enum(["CUSTOMER", "RIDER", "MERCHANT_ADMIN"]).default("CUSTOMER"),
 });
 
 export async function POST(request: NextRequest) {
