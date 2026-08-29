@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
+import NextAuth from "next-auth";
 
-import { auth } from "./auth";
+import { authConfig } from "@/auth.config";
 import type { UserRole } from "@/models/User";
+
+const { auth } = NextAuth(authConfig);
 
 const protectedRoutes: Array<{ prefix: string; roles: UserRole[] }> = [
   { prefix: "/api/merchant", roles: ["MERCHANT_ADMIN", "SUPER_ADMIN"] },
@@ -46,5 +49,12 @@ export default auth((request) => {
 });
 
 export const config = {
-  matcher: ["/api/merchant/:path*", "/merchant/:path*", "/api/rider/:path*", "/rider/:path*", "/api/admin/:path*", "/admin/:path*"],
+  matcher: [
+    "/api/merchant/:path*",
+    "/merchant/:path*",
+    "/api/rider/:path*",
+    "/rider/:path*",
+    "/api/admin/:path*",
+    "/admin/:path*",
+  ],
 };

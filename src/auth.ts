@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import "next-auth/jwt";
 import { z } from "zod";
 
+import { authConfig } from "./auth.config";
 import type { UserRole } from "@/models/User";
 
 const credentialsSchema = z.object({
@@ -35,12 +36,7 @@ declare module "next-auth/jwt" {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  trustHost: true,
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "foodgo_fallback_jwt_secret_token_1234567890",
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
+  ...authConfig,
   providers: [
     Credentials({
       credentials: {
@@ -99,26 +95,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  session: { strategy: "jwt" },
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.activeBranchId = user.activeBranchId;
-      }
-
-      return token;
-    },
-    session({ session, token }) {
-      session.user.id = token.id ?? "";
-      session.user.role = token.role ?? "CUSTOMER";
-
-      if (token.activeBranchId) {
-        session.user.activeBranchId = token.activeBranchId;
-      }
-
-      return session;
-    },
-  },
 });
