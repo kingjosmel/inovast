@@ -24,7 +24,7 @@ interface SocketBroadcastRequest {
 
 export async function POST(request: Request) {
   try {
-    const session = await requireRole(["RIDER"]);
+    const session = await requireRole(["RIDER", "SUPER_ADMIN"]);
 
     if (!session?.user.id) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });

@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,7 +43,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         redirect: false,
       });
 
-      if (!result?.ok) {
+      if (!result || result.error) {
         setError(result?.error || "Invalid email or password");
         setIsLoading(false);
         return;
@@ -52,38 +52,32 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       if (onSuccess) {
         onSuccess();
       }
+
+      // Retrieve session to redirect directly to user's portal
+      const sessionResponse = await fetch("/api/auth/session");
+      if (sessionResponse.ok) {
+        const session = await sessionResponse.json();
+        const role = session?.user?.role;
+
+        if (role === "MERCHANT_ADMIN") {
+          router.push("/merchant");
+        } else if (role === "RIDER") {
+          router.push("/rider");
+        } else if (role === "SUPER_ADMIN") {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
+      } else {
+        router.push("/");
+      }
+
+      router.refresh();
     } catch {
       setError("An unexpected error occurred. Please try again.");
       setIsLoading(false);
     }
   };
-
-  // Redirect after successful login
-  useEffect(() => {
-    const checkSession = async () => {
-      const response = await fetch("/api/auth/session");
-      if (response.ok) {
-        const session = await response.json();
-        if (session?.user?.role) {
-          const role = session.user.role;
-          if (role === "CUSTOMER") {
-            router.push("/");
-          } else if (role === "MERCHANT_ADMIN") {
-            router.push("/merchant");
-          } else if (role === "RIDER") {
-            router.push("/rider");
-          } else if (role === "SUPER_ADMIN") {
-            router.push("/admin");
-          }
-        }
-      }
-    };
-
-    if (!isLoading && !error) {
-      // Check if login was successful
-      checkSession();
-    }
-  }, [isLoading, error, router]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

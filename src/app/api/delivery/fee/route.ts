@@ -29,18 +29,26 @@ interface DistanceMatrixResponse {
   status?: string;
 }
 
+function calculateHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c * 1.25; // 1.25 urban road factor
+}
+
 export async function POST(request: Request) {
   try {
     const parsed = requestSchema.safeParse(await request.json());
 
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid delivery fee request" }, { status: 400 });
-    }
-
-    const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-    if (!mapsApiKey) {
-      return NextResponse.json({ error: "Maps service is not configured" }, { status: 500 });
     }
 
     await connectToDatabase();
@@ -51,38 +59,49 @@ export async function POST(request: Request) {
     }
 
     const [branchLng, branchLat] = branch.location.coordinates;
-    const mapsResponse = await axios.get<DistanceMatrixResponse>(
-      "https://maps.googleapis.com/maps/api/distancematrix/json",
-      {
-        params: {
-          origins: `${branchLat},${branchLng}`,
-          destinations: `${parsed.data.destinationCoordinates.lat},${parsed.data.destinationCoordinates.lng}`,
-          mode: "driving",
-          key: mapsApiKey,
-        },
-        timeout: 8_000,
-      },
-    );
+    const destLat = parsed.data.destinationCoordinates.lat;
+    const destLng = parsed.data.destinationCoordinates.lng;
 
-    const element = mapsResponse.data.rows?.[0]?.elements?.[0];
+    const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-    if (
-      mapsResponse.data.status !== "OK" ||
-      !element ||
-      element.status !== "OK" ||
-      !element.distance ||
-      !element.duration
-    ) {
-      return NextResponse.json({ error: "Unable to calculate driving distance" }, { status: 502 });
+    let distanceKm = calculateHaversineDistance(branchLat, branchLng, destLat, destLng);
+    let durationMins = Math.max(12, Math.ceil(distanceKm * 4 + 8));
+
+    if (mapsApiKey && mapsApiKey !== "DEMO_MAP_KEY") {
+      try {
+        const mapsResponse = await axios.get<DistanceMatrixResponse>(
+          "https://maps.googleapis.com/maps/api/distancematrix/json",
+          {
+            params: {
+              origins: `${branchLat},${branchLng}`,
+              destinations: `${destLat},${destLng}`,
+              mode: "driving",
+              key: mapsApiKey,
+            },
+            timeout: 5_000,
+          },
+        );
+
+        const element = mapsResponse.data.rows?.[0]?.elements?.[0];
+        if (element?.status === "OK" && element.distance?.value && element.duration?.value) {
+          distanceKm = element.distance.value / 1_000;
+          durationMins = Math.ceil(element.duration.value / 60);
+        }
+      } catch (err) {
+        console.warn("Maps DistanceMatrix fallback to Haversine calculation", err);
+      }
     }
 
-    const distanceKm = element.distance.value / 1_000;
-    const durationMins = Math.ceil(element.duration.value / 60);
-    const uncappedFee =
-      (branch.baseDeliveryFee + distanceKm * branch.perKmRate) * SURGE_MULTIPLIER;
+    const baseFee = branch.baseDeliveryFee || 500;
+    const perKm = branch.perKmRate || 150;
+    const uncappedFee = (baseFee + distanceKm * perKm) * SURGE_MULTIPLIER;
     const deliveryFee = Math.min(MAX_FEE, Math.max(MIN_FEE, Math.round(uncappedFee)));
 
-    return NextResponse.json({ distanceKm, durationMins, deliveryFee });
+    return NextResponse.json({
+      distanceKm: Number(distanceKm.toFixed(1)),
+      durationMins,
+      deliveryFee,
+    });
   } catch (error) {
     console.error("Delivery fee calculation failed", error);
     return NextResponse.json({ error: "Unable to calculate delivery fee" }, { status: 500 });

@@ -18,24 +18,34 @@ const cached: MongooseCache = globalThis.mongoose ?? {
 
 globalThis.mongoose = cached;
 
+mongoose.set("bufferCommands", false);
+
 export async function connectToDatabase(): Promise<typeof mongoose> {
-  if (cached.conn) {
+  if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
-      bufferCommands: false,
-    });
+    cached.promise = mongoose
+      .connect(MONGODB_URI, {
+        bufferCommands: false,
+        serverSelectionTimeoutMS: 3000,
+      })
+      .then((m) => {
+        if (process.env.NODE_ENV !== "production") {
+          console.info("MongoDB connected");
+        }
+        return m;
+      })
+      .catch((err) => {
+        console.warn("MongoDB connection warning:", err.message);
+        cached.promise = null;
+        throw err;
+      });
   }
 
   try {
     cached.conn = await cached.promise;
-
-    if (process.env.NODE_ENV !== "production") {
-      console.info("MongoDB connected");
-    }
-
     return cached.conn;
   } catch (error) {
     cached.promise = null;

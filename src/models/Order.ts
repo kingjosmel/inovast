@@ -6,6 +6,7 @@ export const ORDER_STATUSES = [
   "PREPARING",
   "READY",
   "PICKED_UP",
+  "OUT_FOR_DELIVERY",
   "DELIVERED",
   "CANCELLED",
 ] as const;
@@ -27,10 +28,14 @@ export interface IOrderDeliveryAddress {
   addressLine: string;
   city: string;
   area: string;
+  landmark?: string;
+  phone?: string;
+  deliveryInstructions?: string;
   coordinates: [number, number];
 }
 
 export interface IOrder {
+  _id: Types.ObjectId;
   orderNumber: string;
   customerId: Types.ObjectId;
   branchId: Types.ObjectId;
@@ -44,6 +49,8 @@ export interface IOrder {
   paymentStatus: PaymentStatus;
   paystackReference?: string;
   deliveryAddress: IOrderDeliveryAddress;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const OrderItemSchema = new Schema<IOrderItem>(
@@ -62,6 +69,9 @@ const OrderDeliveryAddressSchema = new Schema<IOrderDeliveryAddress>(
     addressLine: { type: String, required: true, trim: true },
     city: { type: String, required: true, trim: true },
     area: { type: String, required: true, trim: true },
+    landmark: { type: String, trim: true },
+    phone: { type: String, trim: true },
+    deliveryInstructions: { type: String, trim: true },
     coordinates: {
       type: [Number],
       required: true,
@@ -74,21 +84,24 @@ const OrderDeliveryAddressSchema = new Schema<IOrderDeliveryAddress>(
   { _id: false },
 );
 
-const OrderSchema = new Schema<IOrder>({
-  orderNumber: { type: String, required: true, unique: true, trim: true },
-  customerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  branchId: { type: Schema.Types.ObjectId, ref: "Branch", required: true },
-  riderId: { type: Schema.Types.ObjectId, ref: "User" },
-  items: { type: [OrderItemSchema], required: true, validate: (items: IOrderItem[]) => items.length > 0 },
-  subtotal: { type: Number, required: true, min: 0 },
-  deliveryFee: { type: Number, required: true, min: 0 },
-  serviceFee: { type: Number, required: true, min: 0 },
-  totalAmount: { type: Number, required: true, min: 0 },
-  status: { type: String, enum: ORDER_STATUSES, default: "PLACED", required: true },
-  paymentStatus: { type: String, enum: PAYMENT_STATUSES, default: "PENDING", required: true },
-  paystackReference: { type: String, unique: true, sparse: true, trim: true },
-  deliveryAddress: { type: OrderDeliveryAddressSchema, required: true },
-});
+const OrderSchema = new Schema<IOrder>(
+  {
+    orderNumber: { type: String, required: true, unique: true, trim: true },
+    customerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    branchId: { type: Schema.Types.ObjectId, ref: "Branch", required: true },
+    riderId: { type: Schema.Types.ObjectId, ref: "User" },
+    items: { type: [OrderItemSchema], required: true, validate: (items: IOrderItem[]) => items.length > 0 },
+    subtotal: { type: Number, required: true, min: 0 },
+    deliveryFee: { type: Number, required: true, min: 0 },
+    serviceFee: { type: Number, required: true, min: 0 },
+    totalAmount: { type: Number, required: true, min: 0 },
+    status: { type: String, enum: ORDER_STATUSES, default: "PLACED", required: true },
+    paymentStatus: { type: String, enum: PAYMENT_STATUSES, default: "PENDING", required: true },
+    paystackReference: { type: String, unique: true, sparse: true, trim: true },
+    deliveryAddress: { type: OrderDeliveryAddressSchema, required: true },
+  },
+  { timestamps: true },
+);
 
 const Order = mongoose.models.Order || mongoose.model<IOrder>("Order", OrderSchema);
 
