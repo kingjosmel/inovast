@@ -38,7 +38,7 @@ export function MerchantCard({
 
   return (
     <Link
-      href={`/merchant/${slug}`}
+      href={`/restaurants/${slug}`}
       id={`merchant-card-${slug}`}
       className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-200 hover:-translate-y-1 hover:border-orange-300 hover:shadow-lg"
     >
