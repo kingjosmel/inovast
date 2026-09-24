@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { MapPin, Check, ChevronRight, X, Navigation } from "lucide-react";
 import { useLocationStore } from "@/store/useLocationStore";
@@ -291,20 +291,6 @@ export function LocationSelectorModal({
   const setIsOpen = isControlled
     ? (controlledOnOpenChange ?? (() => {}))
     : setUncontrolledOpen;
-
-  // Trigger modal on initial visit if no location is stored
-  useEffect(() => {
-    if (!selectedCity || !selectedArea) {
-      const timer = setTimeout(() => {
-        if (!isControlled) {
-          setUncontrolledOpen(true);
-        } else if (controlledOnOpenChange) {
-          controlledOnOpenChange(true);
-        }
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [selectedCity, selectedArea, isControlled, controlledOnOpenChange]);
 
   const locationDisplay =
     selectedCity && selectedArea
