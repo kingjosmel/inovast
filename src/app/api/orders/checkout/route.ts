@@ -6,7 +6,10 @@ import { requireRole } from "@/lib/auth-guard";
 import { connectToDatabase } from "@/lib/db";
 import { checkoutSchema } from "@/lib/validations/checkout";
 import Branch from "@/models/Branch";
-import MenuItem from "@/models/MenuItem";
+import MenuItem, {
+  type ICustomizationGroup,
+  type ICustomizationOption,
+} from "@/models/MenuItem";
 import Order from "@/models/Order";
 
 interface PaystackInitializeResponse {
@@ -56,24 +59,75 @@ export async function POST(request: Request) {
 
     const menuItems = await MenuItem.find({
       _id: { $in: cleanItemIds },
+      branchId: branch._id,
     }).lean();
     const menuItemsById = new Map(menuItems.map((item) => [item._id.toString(), item]));
 
-    const orderItems = rawItems.map((item) => {
+    const orderItems = [];
+    for (const item of rawItems) {
       const cleanId = item.menuItemId.toString().split("-")[0];
       const menuItem = menuItemsById.get(cleanId);
 
-      const effectiveUnitPrice = item.unitPrice > 0 ? item.unitPrice : menuItem?.price || 1000;
-      const optionsLabels = item.selectedOptions?.map((opt) => `${opt.groupName}: ${opt.optionName}`) || [];
+      if (!menuItem) {
+        return NextResponse.json(
+          { error: "One or more menu items are not available at this branch" },
+          { status: 400 },
+        );
+      }
 
-      return {
-        menuItemId: menuItem ? menuItem._id : cleanId,
-        title: item.title || menuItem?.title || "Menu Item",
+      if (!menuItem.inStock) {
+        return NextResponse.json(
+          { error: `${menuItem.title} is currently out of stock` },
+          { status: 400 },
+        );
+      }
+
+      const selectedOptions = item.selectedOptions ?? [];
+      const selectedGroupNames = new Set(selectedOptions.map((option) => option.groupName));
+      const requiredGroupsMissing = menuItem.customizationGroups.some(
+        (group: ICustomizationGroup) =>
+          group.required && !selectedGroupNames.has(group.groupName),
+      );
+
+      if (requiredGroupsMissing) {
+        return NextResponse.json(
+          { error: `Please select all required options for ${menuItem.title}` },
+          { status: 400 },
+        );
+      }
+
+      let optionsTotal = 0;
+      const optionsLabels: string[] = [];
+
+      for (const selectedOption of selectedOptions) {
+        const group = menuItem.customizationGroups.find(
+          (candidate: ICustomizationGroup) =>
+            candidate.groupName === selectedOption.groupName,
+        );
+        const option = group?.options.find(
+          (candidate: ICustomizationOption) =>
+            candidate.name === selectedOption.optionName,
+        );
+
+        if (!group || !option) {
+          return NextResponse.json(
+            { error: `Invalid customization selected for ${menuItem.title}` },
+            { status: 400 },
+          );
+        }
+
+        optionsTotal += option.extraPrice;
+        optionsLabels.push(`${group.groupName}: ${option.name}`);
+      }
+
+      orderItems.push({
+        menuItemId: menuItem._id,
+        title: menuItem.title,
         quantity: item.quantity,
-        unitPrice: effectiveUnitPrice,
+        unitPrice: menuItem.price + optionsTotal,
         optionsSelected: optionsLabels,
-      };
-    });
+      });
+    }
 
     const subtotal = orderItems.reduce(
       (sum, item) => sum + item.unitPrice * item.quantity,

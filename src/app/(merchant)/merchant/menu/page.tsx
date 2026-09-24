@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { StockToggle } from "@/components/merchant/StockToggle";
+import { AddMenuItemModal } from "@/components/merchant/AddMenuItemModal";
 import {
   UtensilsCrossed,
   Search,
@@ -13,6 +14,7 @@ import {
   Loader2,
   PackageX,
   Sparkles,
+  Plus,
 } from "lucide-react";
 import type { SerializedMenuItem } from "@/app/api/merchants/[slug]/route";
 
@@ -23,6 +25,7 @@ export default function MerchantMenuPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [stockFilter, setStockFilter] = useState<"ALL" | "IN_STOCK" | "OUT_OF_STOCK">("ALL");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const fetchMenuItems = async () => {
     try {
@@ -131,6 +134,14 @@ export default function MerchantMenuPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-2 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add menu item
+            </button>
             <button
               id="refresh-menu-btn"
               type="button"
@@ -347,6 +358,11 @@ export default function MerchantMenuPage() {
           </div>
         </div>
       </div>
+      <AddMenuItemModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onCreated={fetchMenuItems}
+      />
     </RoleGuard>
   );
 }

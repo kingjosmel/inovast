@@ -28,50 +28,47 @@ export async function PATCH(request: Request) {
     const rawBody = await request.json();
     const parsed = orderStatusUpdateSchema.safeParse(rawBody);
 
-    let orderId: string = rawBody.orderId || "";
-    let targetStatus: string = rawBody.status || "";
-
     if (!parsed.success) {
-      // Fallback if client passed mock ID
-      if (rawBody.orderId && ["CONFIRMED", "PREPARING", "READY", "PICKED_UP", "DELIVERED", "CANCELLED"].includes(rawBody.status)) {
-        orderId = String(rawBody.orderId);
-        targetStatus = String(rawBody.status);
-      } else {
-        return NextResponse.json({ error: "Invalid order status update" }, { status: 400 });
-      }
-    } else {
-      orderId = parsed.data.orderId;
-      targetStatus = parsed.data.status;
+      return NextResponse.json({ error: "Invalid order status update" }, { status: 400 });
     }
 
-    try {
-      await connectToDatabase();
-      const order = await Order.findByIdAndUpdate(
-        orderId,
-        { status: targetStatus },
-        { new: true },
-      ).lean();
+    const { orderId, status: targetStatus } = parsed.data;
+    const accessFilter =
+      session.user.role === "SUPER_ADMIN"
+        ? {}
+        : session.user.role === "RIDER"
+          ? { riderId: session.user.id }
+          : session.user.activeBranchId
+            ? { branchId: session.user.activeBranchId }
+            : null;
 
-      if (order) {
-        const socketServerUrl = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL;
-
-        if (socketServerUrl) {
-          const payload: SocketBroadcastRequest = {
-            room: `order_${order._id.toString()}`,
-            event: "order_status_changed",
-            payload: { orderId: order._id.toString(), status: order.status },
-          };
-
-          await axios.post(`${socketServerUrl}/broadcast`, payload, { timeout: 5_000 }).catch(() => {});
-        }
-
-        return NextResponse.json({ success: true, orderId: order._id.toString(), status: order.status });
-      }
-    } catch (dbErr) {
-      console.warn("DB order status update fallback", dbErr);
+    if (!accessFilter) {
+      return NextResponse.json({ error: "No active branch assigned" }, { status: 403 });
     }
 
-    return NextResponse.json({ success: true, orderId, status: targetStatus });
+    await connectToDatabase();
+    const order = await Order.findOneAndUpdate(
+      { _id: orderId, ...accessFilter },
+      { status: targetStatus },
+      { new: true },
+    ).lean();
+
+    if (!order) {
+      return NextResponse.json({ error: "Order not found or access denied" }, { status: 404 });
+    }
+
+    const socketServerUrl = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL;
+    if (socketServerUrl) {
+      const payload: SocketBroadcastRequest = {
+        room: `order_${order._id.toString()}`,
+        event: "order_status_changed",
+        payload: { orderId: order._id.toString(), status: order.status },
+      };
+
+      await axios.post(`${socketServerUrl}/broadcast`, payload, { timeout: 5_000 }).catch(() => {});
+    }
+
+    return NextResponse.json({ success: true, orderId: order._id.toString(), status: order.status });
   } catch (error) {
     console.error("Order status update failed", error);
     return NextResponse.json({ error: "Unable to update order status" }, { status: 500 });

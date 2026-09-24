@@ -22,34 +22,33 @@ export async function PATCH(request: Request) {
       );
     }
 
-    try {
-      await connectToDatabase();
-
-      if (mongoose.Types.ObjectId.isValid(menuItemId)) {
-        const updatedItem = await MenuItem.findByIdAndUpdate(
-          menuItemId,
-          { inStock },
-          { new: true },
-        ).lean();
-
-        if (updatedItem) {
-          return NextResponse.json({
-            success: true,
-            menuItemId: String(updatedItem._id),
-            inStock: updatedItem.inStock,
-            title: updatedItem.title,
-          });
-        }
-      }
-    } catch (dbErr) {
-      console.warn("DB stock update fallback", dbErr);
+    if (!mongoose.Types.ObjectId.isValid(menuItemId)) {
+      return NextResponse.json({ error: "Invalid menu item ID" }, { status: 400 });
     }
 
-    // Fallback success response for client simulation / mock IDs
+    if (session.user.role !== "SUPER_ADMIN" && !session.user.activeBranchId) {
+      return NextResponse.json({ error: "No active branch assigned" }, { status: 403 });
+    }
+
+    await connectToDatabase();
+    const updatedItem = await MenuItem.findOneAndUpdate(
+      {
+        _id: menuItemId,
+        ...(session.user.role === "SUPER_ADMIN" ? {} : { branchId: session.user.activeBranchId }),
+      },
+      { inStock },
+      { new: true },
+    ).lean();
+
+    if (!updatedItem) {
+      return NextResponse.json({ error: "Menu item not found or access denied" }, { status: 404 });
+    }
+
     return NextResponse.json({
       success: true,
-      menuItemId,
-      inStock,
+      menuItemId: String(updatedItem._id),
+      inStock: updatedItem.inStock,
+      title: updatedItem.title,
     });
   } catch (error) {
     console.error("Failed to update menu stock status", error);

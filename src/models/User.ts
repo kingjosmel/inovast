@@ -27,6 +27,7 @@ export interface IUser {
   addresses: IUserAddress[];
   activeBranchId?: Types.ObjectId;
   isVerified: boolean;
+  isOnline: boolean;
 }
 
 const UserAddressSchema = new Schema<IUserAddress>(
@@ -50,6 +51,7 @@ const UserSchema = new Schema<IUser>({
   addresses: { type: [UserAddressSchema], default: [] },
   activeBranchId: { type: Schema.Types.ObjectId, ref: "Branch" },
   isVerified: { type: Boolean, default: false, required: true },
+  isOnline: { type: Boolean, default: false, required: true },
 });
 
 const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

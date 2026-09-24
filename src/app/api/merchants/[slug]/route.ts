@@ -18,6 +18,36 @@ export interface SerializedMenuItem {
 }
 
 export const MOCK_MENU_ITEMS: Record<string, SerializedMenuItem[]> = {
+  "zestora": [
+    ["Loaded Fries", "Crispy fries piled with chicken, cheese sauce, and house toppings.", 3500, "Loaded Fries", "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=600&q=80"],
+    ["Shawarma", "Toasted wrap filled with seasoned chicken, crunchy vegetables, and creamy sauce.", 3000, "Wraps", "https://images.unsplash.com/photo-1529006557810-274b9b2fc783?auto=format&fit=crop&w=600&q=80"],
+    ["Chips", "Golden crunchy potato chips served with a signature dip.", 1800, "Sides", "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=600&q=80"],
+    ["Samosa", "Crisp pastry pockets filled with spiced vegetables and beef.", 1500, "Small Chops", "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80"],
+    ["Spring Roll", "Crispy rolls filled with vegetables and lightly seasoned chicken.", 1500, "Small Chops", "https://images.unsplash.com/photo-1548507200-9a5d7e0b7c7b?auto=format&fit=crop&w=600&q=80"],
+    ["Meat Pie", "Buttery baked pastry filled with minced beef, potatoes, and carrots.", 1200, "Pastries", "https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=600&q=80"],
+    ["Egg Roll", "Soft golden pastry wrapped around a whole seasoned egg.", 1000, "Pastries", "https://images.unsplash.com/photo-1510693206972-df098f0cbf2b?auto=format&fit=crop&w=600&q=80"],
+    ["Smoothie", "Fresh blended fruit smoothie served chilled.", 2500, "Drinks", "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=600&q=80"],
+    ["Ice Cream", "Cool creamy scoops with your choice of daily flavors.", 2200, "Desserts", "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=600&q=80"],
+    ["Milkshake", "Thick vanilla, chocolate, or strawberry shake topped with cream.", 2800, "Drinks", "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=80"],
+    ["French Fries", "Classic thin-cut fries, hot and lightly salted.", 1800, "Sides", "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=600&q=80"],
+    ["Burger", "Juicy beef burger with lettuce, tomato, cheese, and house sauce.", 4000, "Burgers", "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80"],
+    ["Plantain", "Sweet ripe plantain fried until golden and caramelized.", 1800, "Sides", "https://images.unsplash.com/photo-1603833665858-e61d17a86224?auto=format&fit=crop&w=600&q=80"],
+    ["Egg", "Two boiled eggs with a pinch of house seasoning.", 800, "Extras", "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=600&q=80"],
+    ["Pizza", "Cheesy oven-baked pizza with pepperoni, peppers, and herbs.", 6500, "Pizza", "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=600&q=80"],
+    ["Coconut Yogurt", "Smooth coconut yogurt topped with toasted granola.", 2600, "Desserts", "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=600&q=80"],
+    ["Drinks & Bottled Water", "Chilled soft drink or bottled water.", 700, "Drinks", "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=600&q=80"],
+    ["Fruit Salad", "A bright cup of seasonal watermelon, pineapple, melon, and grapes.", 2400, "Healthy", "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?auto=format&fit=crop&w=600&q=80"],
+  ].map(([title, description, price, category, imageUrl], index) => ({
+    _id: `65f1000000000000000000${String(index + 1).padStart(2, "0")}`,
+    branchId: "65b002222222222222222207",
+    title: title as string,
+    description: description as string,
+    price: price as number,
+    category: category as string,
+    imageUrl: imageUrl as string,
+    inStock: true,
+    customizationGroups: [],
+  })),
   "mega-chicken-ikeja": [
     {
       _id: "mi-101",

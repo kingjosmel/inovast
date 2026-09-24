@@ -26,24 +26,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "orderId is required" }, { status: 400 });
     }
 
-    let updatedOrder = null;
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return NextResponse.json({ error: "Invalid order ID" }, { status: 400 });
+    }
 
-    try {
-      await connectToDatabase();
+    await connectToDatabase();
+    const updatedOrder = await Order.findOneAndUpdate(
+      {
+        _id: orderId,
+        riderId: { $exists: false },
+        status: { $in: ["READY", "CONFIRMED"] },
+      },
+      { riderId: session.user.id, status: "CONFIRMED" },
+      { new: true },
+    ).lean();
 
-      if (mongoose.Types.ObjectId.isValid(orderId)) {
-        updatedOrder = await Order.findByIdAndUpdate(
-          orderId,
-          {
-            riderId: session.user.id,
-            // If it's placed or ready, transition to heading to pickup or keep ready
-            status: "CONFIRMED",
-          },
-          { new: true },
-        ).lean();
-      }
-    } catch (dbErr) {
-      console.warn("DB accept order fallback", dbErr);
+    if (!updatedOrder) {
+      return NextResponse.json({ error: "Order is no longer available" }, { status: 409 });
     }
 
     const socketServerUrl = process.env.NEXT_PUBLIC_SOCKET_SERVER_URL;
@@ -64,7 +63,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       orderId,
-      tripId: updatedOrder ? String(updatedOrder._id) : orderId,
+      tripId: String(updatedOrder._id),
       message: "Dispatch offer accepted successfully",
     });
   } catch (error) {

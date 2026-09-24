@@ -12,7 +12,7 @@ export type StockToggleInput = z.infer<typeof stockToggleSchema>;
 export const orderStatusUpdateSchema = z.object({
   orderId: objectIdSchema,
   status: z.enum(
-    ["CONFIRMED", "PREPARING", "READY", "PICKED_UP", "DELIVERED", "CANCELLED"],
+    ["CONFIRMED", "PREPARING", "READY", "PICKED_UP", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"],
     { error: "Please provide a valid order status" },
   ),
 });

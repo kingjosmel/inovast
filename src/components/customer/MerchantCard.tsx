@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Motorbike, Star } from "lucide-react";
+import { Clock, Motorbike, Pin, Star } from "lucide-react";
 
 export interface MerchantCardProps {
   id?: string;
@@ -15,6 +15,7 @@ export interface MerchantCardProps {
   ratingCount?: number;
   deliveryTime?: string;
   isOpen: boolean;
+  featured?: boolean;
   categories?: string[];
   area?: string;
 }
@@ -29,6 +30,7 @@ export function MerchantCard({
   ratingCount = 120,
   deliveryTime = "25-35 min",
   isOpen,
+  featured = false,
   categories = [],
   area,
 }: MerchantCardProps) {
@@ -55,6 +57,12 @@ export function MerchantCard({
 
         {/* Status Badge */}
         <div className="absolute left-3 top-3 flex items-center gap-1.5">
+          {featured && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-950/85 px-2.5 py-1 text-xs font-bold text-white shadow-sm backdrop-blur-md">
+              <Pin className="h-3 w-3 fill-amber-400 text-amber-400" />
+              Pinned for you
+            </span>
+          )}
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold tracking-wide shadow-sm backdrop-blur-md ${
               isOpen

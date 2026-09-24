@@ -28,7 +28,7 @@ export function CustomerFeed({ initialMerchants }: CustomerFeedProps) {
   const [onlyOpen, setOnlyOpen] = useState(false);
 
   const filteredMerchants = useMemo(() => {
-    return initialMerchants.filter((merchant) => {
+    const matches = initialMerchants.filter((merchant) => {
       // Location filtering if user has selected a city/area
       if (selectedCity && merchant.city) {
         if (merchant.city.toLowerCase() !== selectedCity.toLowerCase()) {
@@ -63,6 +63,8 @@ export function CustomerFeed({ initialMerchants }: CustomerFeedProps) {
 
       return true;
     });
+
+    return matches.sort((first, second) => Number(Boolean(second.featured)) - Number(Boolean(first.featured)));
   }, [initialMerchants, selectedCity, selectedCategory, searchQuery, onlyOpen]);
 
   return (
@@ -144,6 +146,7 @@ export function CustomerFeed({ initialMerchants }: CustomerFeedProps) {
                 ratingCount={merchant.ratingCount}
                 deliveryTime={merchant.deliveryTime}
                 isOpen={merchant.isOpen}
+                featured={merchant.featured}
                 categories={merchant.categories}
                 area={merchant.area}
               />

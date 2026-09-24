@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireRole } from "@/lib/auth-guard";
 import { connectToDatabase } from "@/lib/db";
-import Branch from "@/models/Branch";
-import Order, { type OrderStatus } from "@/models/Order";
+import Order, { type IOrderItem, type OrderStatus } from "@/models/Order";
 
 export interface KanbanOrder {
   _id: string;
@@ -147,66 +146,43 @@ export async function GET() {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
-    let branchId = session.user.activeBranchId;
-
-    try {
-      await connectToDatabase();
-
-      if (!branchId) {
-        const firstBranch = await Branch.findOne({}).lean();
-        if (firstBranch) {
-          branchId = String(firstBranch._id);
-        }
-      }
-
-      if (branchId) {
-        const dbOrders = await Order.find({ branchId })
-          .sort({ createdAt: -1 })
-          .populate("customerId", "name email phone")
-          .lean();
-
-        if (dbOrders && dbOrders.length > 0) {
-          const formattedOrders: KanbanOrder[] = dbOrders.map((o) => {
-            const cust = o.customerId as unknown as { name?: string; phone?: string } | null;
-            return {
-              _id: String(o._id),
-              orderNumber: o.orderNumber,
-              customerName: cust?.name || "Customer",
-              customerPhone: cust?.phone || o.deliveryAddress?.phone || "+234 800 000 0000",
-              branchId: String(o.branchId),
-              items: (o.items as Array<{ title: string; quantity: number; unitPrice: number; optionsSelected?: string[] }>).map((it) => ({
-                title: it.title,
-                quantity: it.quantity,
-                unitPrice: it.unitPrice,
-                optionsSelected: it.optionsSelected || [],
-              })),
-              subtotal: o.subtotal,
-              deliveryFee: o.deliveryFee,
-              totalAmount: o.totalAmount,
-              status: o.status as OrderStatus,
-              paymentStatus: o.paymentStatus,
-              deliveryInstructions: o.deliveryAddress?.deliveryInstructions || o.deliveryAddress?.landmark || "",
-              createdAt: o.createdAt.toISOString(),
-              updatedAt: o.updatedAt ? o.updatedAt.toISOString() : o.createdAt.toISOString(),
-            };
-          });
-
-          return NextResponse.json({
-            success: true,
-            branchId,
-            orders: formattedOrders,
-          });
-        }
-      }
-    } catch (dbErr) {
-      console.warn("DB orders fetch fallback", dbErr);
+    const branchId = session.user.activeBranchId;
+    if (!branchId && session.user.role !== "SUPER_ADMIN") {
+      return NextResponse.json({ error: "No active branch assigned" }, { status: 403 });
     }
 
-    return NextResponse.json({
-      success: true,
-      branchId: branchId || "65b002222222222222222201",
-      orders: MOCK_KANBAN_ORDERS,
+    await connectToDatabase();
+    const dbOrders = await Order.find(branchId ? { branchId } : {})
+      .sort({ createdAt: -1 })
+      .populate("customerId", "name email phone")
+      .lean();
+
+    const formattedOrders: KanbanOrder[] = dbOrders.map((o) => {
+      const cust = o.customerId as unknown as { name?: string; phone?: string } | null;
+      return {
+        _id: String(o._id),
+        orderNumber: o.orderNumber,
+        customerName: cust?.name || "Customer",
+        customerPhone: cust?.phone || o.deliveryAddress?.phone,
+        branchId: String(o.branchId),
+        items: o.items.map((it: IOrderItem) => ({
+          title: it.title,
+          quantity: it.quantity,
+          unitPrice: it.unitPrice,
+          optionsSelected: it.optionsSelected || [],
+        })),
+        subtotal: o.subtotal,
+        deliveryFee: o.deliveryFee,
+        totalAmount: o.totalAmount,
+        status: o.status,
+        paymentStatus: o.paymentStatus,
+        deliveryInstructions: o.deliveryAddress?.deliveryInstructions || o.deliveryAddress?.landmark || "",
+        createdAt: o.createdAt.toISOString(),
+        updatedAt: o.updatedAt ? o.updatedAt.toISOString() : o.createdAt.toISOString(),
+      };
     });
+
+    return NextResponse.json({ success: true, branchId: branchId || null, orders: formattedOrders });
   } catch (error) {
     console.error("Merchant orders API error", error);
     return NextResponse.json({ error: "Failed to fetch merchant orders" }, { status: 500 });

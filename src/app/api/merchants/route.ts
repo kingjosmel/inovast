@@ -24,6 +24,24 @@ export interface MerchantFeedItem {
 
 export const MOCK_MERCHANTS: MerchantFeedItem[] = [
   {
+    id: "m-zestora",
+    merchantId: "65b001111111111111111107",
+    branchId: "65b002222222222222222207",
+    name: "Zestora",
+    slug: "zestora",
+    logoUrl: "https://images.unsplash.com/photo-1606756790138-261d2b21cd75?auto=format&fit=crop&w=200&q=80",
+    coverImageUrl: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1200&q=80",
+    rating: 4.9,
+    ratingCount: 284,
+    deliveryTime: "15-25 min",
+    deliveryFee: 500,
+    categories: ["Fast Food", "Shawarma", "Drinks & Desserts", "Featured"],
+    city: "Kaduna",
+    area: "Kaduna",
+    isOpen: true,
+    featured: true,
+  },
+  {
     id: "m-1",
     merchantId: "65b001111111111111111101",
     branchId: "65b002222222222222222201",

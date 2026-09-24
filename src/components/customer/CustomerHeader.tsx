@@ -28,7 +28,7 @@ export function CustomerHeader() {
         <button
           type="button"
           onClick={() => setIsLocationModalOpen(true)}
-          className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-orange-400 hover:bg-orange-50/60 sm:text-sm"
+          className="hidden items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-orange-400 hover:bg-orange-50/60 sm:flex sm:text-sm"
           aria-label="Change delivery location"
         >
           <MapPin className="h-4 w-4 text-orange-500 shrink-0" />

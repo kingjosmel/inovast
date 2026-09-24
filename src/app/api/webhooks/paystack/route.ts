@@ -9,6 +9,8 @@ interface PaystackWebhookPayload {
   event?: string;
   data?: {
     reference?: string;
+    amount?: number;
+    currency?: string;
     metadata?: {
       orderId?: string;
     };
@@ -55,14 +57,31 @@ export async function POST(request: Request) {
     }
 
     await connectToDatabase();
-    const order = await Order.findByIdAndUpdate(
-      orderId,
-      { paymentStatus: "PAID", paystackReference: reference },
+    const existingOrder = await Order.findOne({
+      _id: orderId,
+      paystackReference: reference,
+    }).lean();
+
+    if (!existingOrder) {
+      return NextResponse.json({ error: "Payment does not match an order" }, { status: 400 });
+    }
+
+    if (payload.data?.currency && payload.data.currency !== "NGN") {
+      return NextResponse.json({ error: "Unsupported payment currency" }, { status: 400 });
+    }
+
+    if (typeof payload.data?.amount === "number" && payload.data.amount !== Math.round(existingOrder.totalAmount * 100)) {
+      return NextResponse.json({ error: "Payment amount does not match order" }, { status: 400 });
+    }
+
+    const order = await Order.findOneAndUpdate(
+      { _id: existingOrder._id, paymentStatus: { $ne: "PAID" } },
+      { paymentStatus: "PAID" },
       { new: true },
     ).lean();
 
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json({ received: true });
     }
 
     await AuditLog.create({
