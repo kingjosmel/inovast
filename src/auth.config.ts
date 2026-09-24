@@ -14,6 +14,7 @@ export const authConfig: NextAuthConfig = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.phone = user.phone;
         token.activeBranchId = user.activeBranchId;
       }
 
@@ -22,6 +23,7 @@ export const authConfig: NextAuthConfig = {
     session({ session, token }) {
       session.user.id = token.id ?? "";
       session.user.role = token.role ?? "CUSTOMER";
+      session.user.phone = token.phone ?? "";
 
       if (token.activeBranchId) {
         session.user.activeBranchId = token.activeBranchId;
