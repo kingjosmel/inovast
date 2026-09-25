@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FoodGo - Fast Food & Grocery Delivery",
+  title: "Zestora - Fast Food & Grocery Delivery",
   description: "On-demand food delivery platform connecting customers, merchants, and riders.",
 };
 

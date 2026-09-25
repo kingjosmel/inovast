@@ -12,6 +12,7 @@ import {
   Store,
   UtensilsCrossed,
   Sparkles,
+  UserRound,
 } from "lucide-react";
 
 const navigation = [
@@ -36,7 +37,7 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
                 <ChefHat className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-base font-bold text-slate-900 leading-tight">FoodGo Kitchen</p>
+                <p className="text-base font-bold text-slate-900 leading-tight">Zestora Kitchen</p>
                 <p className="text-xs text-slate-500 font-medium">Merchant Portal</p>
               </div>
             </Link>
@@ -98,14 +99,19 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => signOut({ callbackUrl: "/login" })}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-white hover:text-rose-600 transition cursor-pointer"
-                title="Sign out"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
+              <div className="flex items-center gap-1">
+                <Link href="/merchant/account" className="rounded-lg p-1.5 text-slate-400 hover:bg-white hover:text-emerald-600 transition" title="Account">
+                  <UserRound className="h-4 w-4" />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-white hover:text-rose-600 transition cursor-pointer"
+                  title="Sign out"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
         </aside>

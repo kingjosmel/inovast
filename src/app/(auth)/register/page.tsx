@@ -2,8 +2,8 @@ import Link from "next/link";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 
 export const metadata = {
-  title: "Register | FoodGo",
-  description: "Create a new FoodGo account",
+  title: "Register | Zestora",
+  description: "Create a new Zestora account",
 };
 
 export default function RegisterPage() {
@@ -16,7 +16,7 @@ export default function RegisterPage() {
               F
             </div>
             <h1 className="text-3xl font-bold text-slate-900">Create Account</h1>
-            <p className="mt-2 text-slate-600">Join FoodGo and start your journey</p>
+            <p className="mt-2 text-slate-600">Join Zestora and start your journey</p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white px-6 py-8 shadow-sm">

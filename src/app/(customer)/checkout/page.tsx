@@ -604,7 +604,7 @@ export default function CheckoutPage() {
               <div className="flex items-center gap-2.5 rounded-2xl bg-slate-50 p-3 text-xs text-slate-600 border border-slate-100">
                 <ShieldCheck className="h-5 w-5 text-emerald-600 shrink-0" />
                 <p className="text-[11px] leading-relaxed">
-                  Your payments are processed securely by <strong>Paystack</strong>. No sensitive card credentials are saved on FoodGo servers.
+                  Your payments are processed securely by <strong>Paystack</strong>. No sensitive card credentials are saved on Zestora servers.
                 </p>
               </div>
             </div>

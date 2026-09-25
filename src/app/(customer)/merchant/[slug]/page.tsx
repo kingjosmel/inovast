@@ -106,11 +106,11 @@ async function getMerchantAndMenu(slug: string): Promise<{
 export async function generateMetadata({ params }: MerchantPageProps) {
   const { slug } = await params;
   const data = await getMerchantAndMenu(slug);
-  if (!data) return { title: "Merchant Not Found | FoodGo" };
+  if (!data) return { title: "Merchant Not Found | Zestora" };
 
   return {
-    title: `${data.merchant.name} - Order Online | FoodGo`,
-    description: `Order from ${data.merchant.name} on FoodGo. Fast delivery in ${data.merchant.area}, ${data.merchant.city}.`,
+    title: `${data.merchant.name} - Order Online | Zestora`,
+    description: `Order from ${data.merchant.name} on Zestora. Fast delivery in ${data.merchant.area}, ${data.merchant.city}.`,
   };
 }
 

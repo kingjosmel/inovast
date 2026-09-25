@@ -53,7 +53,7 @@ export async function POST(request: Request) {
         payload: {
           orderId,
           riderId: session.user.id,
-          riderName: session.user.name || "FoodGo Dispatch Rider",
+          riderName: session.user.name || "Zestora Dispatch Rider",
         },
       };
 

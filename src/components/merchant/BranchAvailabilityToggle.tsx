@@ -93,7 +93,7 @@ export function BranchAvailabilityToggle({
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
             {isOpen
-              ? "Your kitchen is active on FoodGo. Customers can place instant pickup and delivery orders."
+              ? "Your kitchen is active on Zestora. Customers can place instant pickup and delivery orders."
               : "Store is paused. New customer orders are blocked until you turn availability back on."}
           </p>
         </div>

@@ -36,7 +36,7 @@ export default function CustomerAccountPage() {
             Welcome, {user?.name || "Customer"}
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-            Manage your profile and keep track of your FoodGo orders.
+            Manage your profile and keep track of your Zestora orders.
           </p>
         </div>
 
@@ -47,7 +47,7 @@ export default function CustomerAccountPage() {
             </div>
             <div className="min-w-0">
               <h2 className="truncate text-lg font-bold text-slate-900">Personal information</h2>
-              <p className="text-sm text-slate-500">Your FoodGo customer profile</p>
+              <p className="text-sm text-slate-500">Your Zestora customer profile</p>
             </div>
           </div>
 

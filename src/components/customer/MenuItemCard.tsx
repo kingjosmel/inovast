@@ -27,13 +27,13 @@ export function MenuItemCard({ item, onSelect }: MenuItemCardProps) {
     <div
       id={`menu-item-${item._id}`}
       onClick={() => item.inStock && onSelect(item)}
-      className={`group relative flex cursor-pointer flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 transition duration-200 sm:flex-row sm:gap-4 ${
+      className={`group relative flex cursor-pointer flex-col justify-between rounded-2xl border border-slate-200 bg-white p-3 transition duration-200 sm:flex-row sm:gap-4 sm:p-4 ${
         item.inStock
           ? "hover:border-orange-400 hover:shadow-md active:scale-[0.99]"
           : "opacity-60 cursor-not-allowed bg-slate-50"
       }`}
     >
-      <div className="flex flex-1 flex-col justify-between pr-2">
+      <div className="flex flex-1 flex-col justify-between sm:pr-2">
         <div>
           <div className="flex items-center gap-2">
             <h4 className="text-base font-bold text-slate-900 group-hover:text-orange-600 transition">
@@ -66,7 +66,7 @@ export function MenuItemCard({ item, onSelect }: MenuItemCardProps) {
       </div>
 
       {/* Item Image with Add Action Button */}
-      <div className="relative mt-3 h-28 w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:mt-0 sm:h-28 sm:w-28">
+      <div className="relative order-first mt-0 aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:order-none sm:mt-0 sm:aspect-square sm:h-28 sm:w-28">
         <Image
           src={item.imageUrl}
           alt={item.title}

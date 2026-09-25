@@ -548,7 +548,7 @@ export default function OrderTrackPage({
                 {/* Live Rider Marker */}
                 <Marker
                   position={riderPosition}
-                  title="FoodGo Courier"
+                  title="Zestora Courier"
                   icon={{
                     url: "https://maps.google.com/mapfiles/ms/icons/motorcycle.png",
                   }}
@@ -639,7 +639,7 @@ export default function OrderTrackPage({
                   Your Dispatch Courier
                 </p>
                 <h4 className="text-sm font-extrabold text-slate-900">
-                  {order?.riderId?.name || "Tunde Ibrahim (FoodGo Express)"}
+                  {order?.riderId?.name || "Tunde Ibrahim (Zestora Express)"}
                 </h4>
                 <p className="text-xs text-slate-500">
                   Yamaha Crux • Plate: KJA-482-XA
@@ -684,7 +684,7 @@ export default function OrderTrackPage({
               <Store className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold text-slate-900">
-                  {order?.branchId?.name || "FoodGo Partner Kitchen"}
+                  {order?.branchId?.name || "Zestora Partner Kitchen"}
                 </p>
                 <p className="text-[11px] text-slate-500">
                   {order?.branchId?.address || "Lagos, Nigeria"}

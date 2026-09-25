@@ -2,8 +2,8 @@ import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm";
 
 export const metadata = {
-  title: "Login | FoodGo",
-  description: "Sign in to your FoodGo account",
+  title: "Login | Zestora",
+  description: "Sign in to your Zestora account",
 };
 
 export default function LoginPage() {
@@ -16,7 +16,7 @@ export default function LoginPage() {
               F
             </div>
             <h1 className="text-3xl font-bold text-slate-900">Sign In</h1>
-            <p className="mt-2 text-slate-600">Welcome back to FoodGo</p>
+            <p className="mt-2 text-slate-600">Welcome back to Zestora</p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white px-6 py-8 shadow-sm">

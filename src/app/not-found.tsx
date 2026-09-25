@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Utensils, Home, ShoppingBag, Store, Bike, ArrowRight } from "lucide-react";
 
 export const metadata = {
-  title: "404 - Page Not Found | FoodGo",
+  title: "404 - Page Not Found | Zestora",
   description: "The page or restaurant you are looking for could not be found.",
 };
 
@@ -50,7 +50,7 @@ export default function NotFound() {
         {/* Quick Portal Links */}
         <div className="pt-6 border-t border-slate-200">
           <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-            Other FoodGo Portals
+            Other Zestora Portals
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link

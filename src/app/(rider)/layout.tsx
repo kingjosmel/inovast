@@ -9,6 +9,7 @@ import {
   Navigation2,
   Wallet,
   Bike,
+  UserRound,
 } from "lucide-react";
 
 const navigation = [
@@ -32,7 +33,7 @@ export default function RiderLayout({ children }: { children: React.ReactNode })
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-black tracking-tight text-white">FoodGo</span>
+                  <span className="text-sm font-black tracking-tight text-white">Zestora</span>
                   <span className="rounded bg-emerald-500/20 px-1.5 py-0.2 text-[10px] font-bold text-emerald-400 uppercase">
                     Rider
                   </span>
@@ -45,6 +46,9 @@ export default function RiderLayout({ children }: { children: React.ReactNode })
 
             <div className="flex items-center gap-2">
               <DutyStatusToggle />
+              <Link href="/rider/account" aria-label="Rider account" className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-700 text-slate-300 hover:border-emerald-500 hover:text-emerald-400">
+                <UserRound className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </header>

@@ -1,5 +1,5 @@
 {
-  "name": "FoodGo",
+  "name": "Zestora",
   "description": "On-demand food delivery platform connecting customers, merchants, and riders.",
   "requestFramePermissions": [
     "geolocation"

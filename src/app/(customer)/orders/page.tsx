@@ -67,7 +67,7 @@ export default function CustomerOrdersPage() {
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-600"><Package className="h-5 w-5" /></span>
                     <div className="min-w-0">
                       <p className="font-bold text-slate-900">Order {order.orderNumber}</p>
-                      <p className="mt-1 truncate text-xs text-slate-500">{order.branch?.name || "FoodGo store"} · {order.itemCount} {order.itemCount === 1 ? "item" : "items"}</p>
+                      <p className="mt-1 truncate text-xs text-slate-500">{order.branch?.name || "Zestora store"} · {order.itemCount} {order.itemCount === 1 ? "item" : "items"}</p>
                       <p className="mt-1 text-xs text-slate-400">{new Date(order.createdAt).toLocaleString()}</p>
                     </div>
                   </div>

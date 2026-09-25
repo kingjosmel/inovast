@@ -69,7 +69,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-black tracking-tight text-slate-900">
-                  FOODGO
+                  ZESTORA
                 </span>
                 <span className="rounded-md bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-amber-400 uppercase tracking-wider">
                   Super Admin

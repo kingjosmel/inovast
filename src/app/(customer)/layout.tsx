@@ -15,7 +15,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
                 F
               </div>
               <div>
-                <p className="text-lg font-black tracking-tight text-slate-900">FoodGo</p>
+                <p className="text-lg font-black tracking-tight text-slate-900">Zestora</p>
               </div>
             </Link>
           </div>
@@ -32,7 +32,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
 
       <footer className="border-t border-slate-200 bg-white mt-auto">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 text-sm text-slate-600 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <p>© 2026 FoodGo - Multi-Portal On-Demand Delivery</p>
+          <p>© 2026 Zestora - Multi-Portal On-Demand Delivery</p>
           <div className="flex gap-4">
             <Link href="/help" className="hover:text-slate-900 transition">Help</Link>
             <Link href="/terms" className="hover:text-slate-900 transition">Terms</Link>
